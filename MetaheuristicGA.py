@@ -6,15 +6,17 @@ def objective_function(x):
 
 # Genetic Algorithms (GA) algorithm
 def ga_optimization(population_size, num_generations, mutation_rate, bounds):
-    num_dimensions = len(bounds)
-    population = np.random.uniform(bounds[0], bounds[1], size=(population_size, num_dimensions))
+    population = np.random.uniform(bounds[0], bounds[1], size=(population_size, 1))
 
     for generation in range(num_generations):
         # Evaluate fitness of each individual in the population
-        fitness = [objective_function(x) for x in population]
+        fitness = np.array([objective_function(x[0]) for x in population])
+
+        # Translate fitness values to a non-negative range
+        fitness = fitness - np.min(fitness) + 1e-6
 
         # Select parents for mating based on fitness (roulette wheel selection)
-        probabilities = 1 / np.array(fitness)
+        probabilities = 1 / fitness
         probabilities /= np.sum(probabilities)
         parent_indices = np.random.choice(population_size, size=population_size, p=probabilities)
 
@@ -22,13 +24,13 @@ def ga_optimization(population_size, num_generations, mutation_rate, bounds):
         offspring = np.zeros_like(population)
         for i in range(population_size // 2):
             parent1, parent2 = population[parent_indices[i*2]], population[parent_indices[i*2+1]]
-            crossover_point = np.random.randint(1, num_dimensions)
+            crossover_point = np.random.randint(1)
             offspring[i*2] = np.concatenate((parent1[:crossover_point], parent2[crossover_point:]))
             offspring[i*2+1] = np.concatenate((parent2[:crossover_point], parent1[crossover_point:]))
 
             # Perform mutation
             if np.random.rand() < mutation_rate:
-                mutation_point = np.random.randint(num_dimensions)
+                mutation_point = np.random.randint(1)
                 offspring[i*2, mutation_point] = np.random.uniform(bounds[0], bounds[1])
                 offspring[i*2+1, mutation_point] = np.random.uniform(bounds[0], bounds[1])
 
@@ -40,7 +42,7 @@ def ga_optimization(population_size, num_generations, mutation_rate, bounds):
     best_solution = population[best_index]
     best_fitness = fitness[best_index]
 
-    return best_solution, best_fitness
+    return best_solution[0], best_fitness - 1e-6 # Return the best solution as a scalar, reverse the translation
 
 # Main function to run GA optimization
 def main():
