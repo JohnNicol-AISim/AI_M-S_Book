@@ -20,11 +20,11 @@ def abc_optimization(num_bees, num_iterations, num_trials, bounds):
         onlooker_probabilities /= np.sum(onlooker_probabilities)
 
         for i in range(num_bees):
-            selected_bee = np.random.choice(num_bees, p=onlooker_probabilities)
+            selected_bee = np.random.choice(range(num_bees), p=onlooker_probabilities)
             trial_solution = employed_bees[i] + np.random.uniform(-1, 1, size=num_dimensions) * (employed_bees[i] - employed_bees[selected_bee])
             trial_fitness = objective_function(trial_solution)
 
-            if trial_fitness < employed_fitness[i]:
+            if trial_fitness < employed_fitness[i]: # Correctly indented
                 employed_bees[i] = trial_solution
                 employed_fitness[i] = trial_fitness
 
